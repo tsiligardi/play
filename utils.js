@@ -1,7 +1,7 @@
 const fetch = require ("node-fetch")
 
-const getField = async() => {
-  let response = await fetch("http://localhost:8080/?format=json")
+const getField = async(link) => {
+  let response = await fetch(`${link}?format=json`)
   if (response.status === 200) {
     response = await response.json()
   } else {
@@ -10,12 +10,12 @@ const getField = async() => {
   return await response
 }
 
-const login = async(name, password) => {
-  const response = await fetch(`http://localhost:8080/signup?name=${name}&password=${password}`)
+const login = async(link, name, password) => {
+  const response = await fetch(`${link}signup?name=${name}&password=${password}`)
   return await response.status
 }
-const battle = async(x, y, team, password) => {
-  let response = await fetch(`http://localhost:8080/fire?x=${x}&y=${y}&team=${team}&password=${password}`)
+const fire = async(link, x, y, team, password) => {
+  let response = await fetch(`${link}fire?x=${x}&y=${y}&team=${team}&password=${password}`)
   if (response.status === 200) {
     response = await response.json()
   } else {
@@ -23,8 +23,8 @@ const battle = async(x, y, team, password) => {
   }
   return await response
 }
-const getScore = async() => {
-  let response = await fetch("http://localhost:8080/score")
+const getScore = async(link) => {
+  let response = await fetch(`${link}score`)
   if (response.status === 200) {
     response = await response.json()
   } else {
@@ -36,7 +36,7 @@ const getScore = async() => {
 module.exports = {
   getField,
   login,
-  battle,
+  fire,
   getScore
 }
 

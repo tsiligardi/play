@@ -1,19 +1,17 @@
-const { getField, login, battle, getScore } = require("./utils")
+const { getField, login, fire, getScore } = require("./utils")
 
 const main = async() => {
+  const link = "http://93.42.249.207:8080/"
   const name = "tommaso"
   const password = "password"
   try {
-    login(name, password)
-    const { field } = await getField()
-    console.log(field)
+    login(link, name, password)
+    const { field } = await getField(link)
     const W = await field[0].length
     const H = await field.length
-    console.log("ciao")
     for (let y = 0;y < H;y++) {
       for (let x = 0;x < W;x++) {
-        console.log(x, y)
-        console.log(await battle(x, y, name, password))
+        console.log(await fire(link, x, y, name, password))
       }
     }
   }   catch (e) {
