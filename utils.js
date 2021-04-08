@@ -1,30 +1,35 @@
 const fetch = require ("node-fetch")
 
-const getField = async(link) => {
-  let response = await fetch(`${link}?format=json`)
+const getField = async function(link) {
+  let response = await fetch(`${link}/?format=json`)
   if (response.status === 200) {
     response = await response.json()
   } else {
     response = await response.status
   }
+  // console.log(response)
   return await response
 }
 
-const login = async(link, name, password) => {
-  const response = await fetch(`${link}signup?name=${name}&password=${password}`)
+const signup = async(link, name, password) => {
+  const response = await fetch(`${link}/signup?team=${name}&password=${password}`)
   return await response.status
 }
 const fire = async(link, x, y, team, password) => {
-  let response = await fetch(`${link}fire?x=${x}&y=${y}&team=${team}&password=${password}`)
+  let response = await fetch(`${link}/fire?x=${x}&y=${y}&team=${team}&password=${password}`)
   if (response.status === 200) {
     response = await response.json()
   } else {
     response = await response.status
+    if (response === 429) {
+      console.log("## DEBUG: non è passato un secondo ##")
+    }
   }
+  console.log(response)
   return await response
 }
 const getScore = async(link) => {
-  let response = await fetch(`${link}score`)
+  let response = await fetch(`${link}/score`)
   if (response.status === 200) {
     response = await response.json()
   } else {
@@ -35,7 +40,7 @@ const getScore = async(link) => {
 
 module.exports = {
   getField,
-  login,
+  signup,
   fire,
   getScore
 }

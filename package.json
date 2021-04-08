@@ -13,6 +13,8 @@
     "@soluzioni-futura/eslint-config-soluzioni-futura": "^1.4.0",
     "eslint": "^7.22.0",
     "express": "^4.17.1",
-    "node-fetch": "^2.6.1"
+    "mathjs": "^9.3.0",
+    "node-fetch": "^2.6.1",
+    "plotly.js-dist": "^1.58.4"
   }
 }
