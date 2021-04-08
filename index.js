@@ -126,12 +126,17 @@ const get_fire_coords = async function(probability_map) {
 }
 
 const take_turn = async function() {
+  let t_0 = Date.now()
   const { field } = await getField(link)
   let probability_map = await get_p_map(field)
   let fire_coords = await get_fire_coords(probability_map)
-  const field_compare = await getField(link)
   for (let i = 0; i < fire_coords.length; i++) {
+    const field_compare = await getField(link)
     if (!field_compare.field[fire_coords[i][0]][fire_coords[i][1]].hit) {
+      let t_1 = Date.now()
+      if (t_1 - t_0 < 1000) {
+        await sleep(1000 - (t_1 - t_0))
+      }
       fire(link, fire_coords[i][1], fire_coords[i][0], name, password)
       break
     }
