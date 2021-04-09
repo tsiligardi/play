@@ -4,6 +4,7 @@ const { getField, fire, signup } = require("./utils")
 
 let W, H;
 const near_ship_weight = 50 // deve essere tarato con dei test, non ho voglia di fare i calcoli matematici per determinare il valore ottimale
+const cumulative_ship_coef = 1.1
 //const link = "http://93.42.249.207:8080"
 const link = "http://127.0.0.1:8080"
 const name = "algoritmo_figo"
@@ -18,29 +19,37 @@ function sleep(ms) {
 const compute_position = async function(p_map, field, _x, _y, w, h) {
   try {
     let is_free = true
+    let interrupt = false
     let ships_number = 0
-    let ship_coords = []
+    let ship_id = "to_be_assigned"
+
     for (let x = _x; x < _x + w; x++) {
+      if (interrupt) {
+        break
+      }
       for (let y = _y; y < _y + h; y++) {
         const cell = field[y][x]
         if (cell.hit && !cell.ship) { // cella colpita senza nave
           p_map[y][x] = -1
           is_free = false
+          interrupt = true
           break
         }
         else if (cell.hit && cell.ship) { // cella colpita con nave
           p_map[y][x] = -1
-          if (!cell.ship.alive) { // è considerato come nave colpita senza nave ai fini del calcolo
-            p_map[y][x] = -1
+          if (!cell.ship.alive) { // è considerato come cella colpita senza nave ai fini del calcolo
             is_free = false
+            interrupt = true
             break
           } else {
             ships_number += 1
-            if (ships_number > 1) { // vuol dire che ci sono più pezzi di navi diverse, quindi non ci può essere la nave
+            if (ship_id === "to_be_assigned") {
+              ship_id = cell.ship.id
+            }
+            if (cell.ship.id !== ship_id) { // vuol dire che ci sono più pezzi di navi diverse, quindi non ci può essere la nave
               is_free = false
+              interrupt = true
               break
-            } else {
-              ships_coords = [y, x]
             }
           }
         }
@@ -50,10 +59,8 @@ const compute_position = async function(p_map, field, _x, _y, w, h) {
       for (let x = _x; x < _x + w; x++) {
         for (let y = _y; y < _y + h; y++) {
           if (p_map[y][x] < 0) { continue }
-          if (ships_number) { // ci passa una nave, bisogna pesarlo maggiormente
-            if (x !== ships_coords[1] || y !== ship_coords[0]) {
-              p_map[y][x] += near_ship_weight
-            }
+          if (ships_number) { // ci passano delle navi, bisogna pesare maggiormente questa posizione
+            p_map[y][x] += near_ship_weight * Math.pow(cumulative_ship_coef, ships_number)
           } else {
             p_map[y][x] += 1
           }
@@ -133,10 +140,10 @@ const take_turn = async function() {
   for (let i = 0; i < fire_coords.length; i++) {
     const field_compare = await getField(link)
     if (!field_compare.field[fire_coords[i][0]][fire_coords[i][1]].hit) {
-      let t_1 = Date.now()
+      /*let t_1 = Date.now()
       if (t_1 - t_0 < 1000) {
         await sleep(1000 - (t_1 - t_0))
-      }
+      }*/
       fire(link, fire_coords[i][1], fire_coords[i][0], name, password)
       break
     }
