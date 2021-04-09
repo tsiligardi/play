@@ -3,7 +3,7 @@ const { getField, fire, signup } = require("./utils")
 
 let W, H;
 const near_ship_weight = 35 // deve essere tarato con dei test, non ho voglia di fare i calcoli matematici per determinare il valore ottimale
-const cumulative_ship_coef = 1.2
+const cumulative_ship_coef = 1.2 // formula del peso extra total_weight = near_ship_weight * (cumulative_ship_coef) ** ships_number
 //const link = "http://93.42.249.207:8080"
 const link = "http://127.0.0.1:8080"
 const name = "algoritmo_figo"
@@ -19,7 +19,7 @@ const compute_position = async function(p_map, field, _x, _y, w, h) {
   try {
     let is_free = true
     let interrupt = false
-    let ships_number = 0
+    let ships_number = 0 // questo numero corrisponde al numero di pezzi di nave con lo stesso id
     let ship_id = "to_be_assigned"
 
     for (let x = _x; x < _x + w; x++) {
@@ -41,7 +41,6 @@ const compute_position = async function(p_map, field, _x, _y, w, h) {
             interrupt = true
             break
           } else {
-            ships_number += 1
             if (ship_id === "to_be_assigned") {
               ship_id = cell.ship.id
             }
@@ -50,6 +49,7 @@ const compute_position = async function(p_map, field, _x, _y, w, h) {
               interrupt = true
               break
             }
+            ships_number += 1
           }
         }
       }
@@ -242,7 +242,6 @@ const take_turn_vecchio = async function() {
 }
 
 const take_turn = async function() {
-  let t_0 = Date.now()
   const { field } = await getField(link)
   let probability_map = await get_p_map(field)
   let fire_coords = await get_fire_coords(probability_map)
@@ -259,10 +258,25 @@ const take_turn = async function() {
   }
 }
 
+const fire_random = async function() {
+  const { field } = await getField(link)
+  while (true) {
+    let x = randomInt(0, W)
+    let y = randomInt(0, H)
+    if (field[y][x].hit) {
+      contine
+    } else {
+      fire(link, x, y, "sparare_random", "aaa")
+      break
+    }
+  }
+}
+
 const main = async function() {
   try {
     signup(link, name, password)
     signup(link, "algo_vecchio", "pwd")
+    signup(link, "sparare_random", "aaa")
     const { field } = await getField(link)
     W = await field[0].length
     H = await field.length
@@ -272,6 +286,7 @@ const main = async function() {
   }
   console.log("login effettuato")
   while (true) {
+    fire_random()
     await take_turn_vecchio()
     await take_turn()
   }
