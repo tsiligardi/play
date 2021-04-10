@@ -38,11 +38,22 @@ const getScore = async(link) => {
   return await response
 }
 
+const shuffle = function(array) {
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+}
+
+
 module.exports = {
   getField,
   signup,
   fire,
-  getScore
+  getScore, 
+  shuffle
 }
 
 // per fare con delle funzioni asincrone devo dichiare un main asincrono che mi va a gesitre tutte le funzioni asincrone

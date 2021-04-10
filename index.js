@@ -1,12 +1,13 @@
 const { randomInt } = require("mathjs");
-const { getField, fire, signup } = require("./utils")
+const { getField, fire, signup, shuffle } = require("./utils")
 
 let W, H;
-const near_ship_weight = 35 // deve essere tarato con dei test, non ho voglia di fare i calcoli matematici per determinare il valore ottimale
-const cumulative_ship_coef = 1.2 // formula del peso extra total_weight = near_ship_weight * (cumulative_ship_coef) ** ships_number
+const max_ship_size = 6
+let near_ship_weight = 0
+const cumulative_ship_coef = 1.4 // formula del peso extra total_weight = near_ship_weight * (cumulative_ship_coef) ** ships_number
 //const link = "http://93.42.249.207:8080"
 const link = "http://127.0.0.1:8080"
-const name = "algoritmo_figo"
+const name = "Br2"
 const password = "c2aea7bdd7e375ad44127fe"
 
 function sleep(ms) {
@@ -93,7 +94,7 @@ const calculate_partial_p_map = async function(ship_size, field) {
 
 const get_p_map = async function(field) {
   let probability_maps = []
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= max_ship_size; i++) {
     let partial_map = await calculate_partial_p_map(i, field)
     probability_maps.push(partial_map)
   }
@@ -135,12 +136,16 @@ const take_turn = async function() {
   const { field } = await getField(link)
   let probability_map = await get_p_map(field)
   let fire_coords = await get_fire_coords(probability_map)
+  shuffle(fire_coords)
+  if (fire_coords.length > 15) {
+    fire_coords = fire_coords.slice(0, 14)
+  }
   for (let i = 0; i < fire_coords.length; i++) {
     const field_compare = await getField(link)
     if (!field_compare.field[fire_coords[i][0]][fire_coords[i][1]].hit) {
       let t_1 = Date.now()
       if (t_1 - t_0 < 1000) {
-        await sleep(1000 - (t_1 - t_0))
+        await sleep(1000 - (t_1 - t_0) + 1)
       }
       fire(link, fire_coords[i][1], fire_coords[i][0], name, password)
       break
@@ -149,10 +154,11 @@ const take_turn = async function() {
 }
 
 const main = async function() {
+  for (let i = 1; i <= max_ship_size; i++) {
+    near_ship_weight += (i * 2)
+  }
   try {
     signup(link, name, password)
-    signup(link, "algo_vecchio", "pwd")
-    signup(link, "sparare_random", "aaa")
     const { field } = await getField(link)
     W = await field[0].length
     H = await field.length
